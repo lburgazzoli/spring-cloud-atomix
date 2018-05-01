@@ -39,6 +39,7 @@
 	<modules>
 		<module>spring-cloud-atomix-dependencies</module>
 		<module>spring-cloud-atomix-core</module>
+		<module>docs</module>
 		<!--
 		<module>spring-cloud-atomix-config</module>
 		<module>spring-cloud-atomix-discovery</module>
@@ -49,7 +50,6 @@
 		<module>spring-cloud-starter-atomix-config</module>
 		<module>spring-cloud-starter-atomix-discovery</module>
 		<module>spring-cloud-starter-atomix-all</module>
-		<module>docs</module>
 		-->
 	</modules>
 

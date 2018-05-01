@@ -6,7 +6,7 @@
 
 	<artifactId>spring-cloud-atomix-core</artifactId>
 	<packaging>jar</packaging>
-	<name>Spring Cloud Atomix Core</name>
+	<name>spring-cloud-atomix-core</name>
 	<description>Spring Cloud Atomix Core</description>
 
 	<parent>
