@@ -1,0 +1,14 @@
+{"properties": [
+  {
+    "name": "management.health.atomix.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable the health endpoint for atomix.",
+    "defaultValue": true
+  },
+  {
+    "name": "endpoints.atomix.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable the /atomix endpoint to inspect the state of atomix.",
+    "defaultValue": true
+  }
+]}
