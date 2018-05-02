@@ -18,8 +18,6 @@ package org.springframework.cloud.atomix;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import io.atomix.cluster.MemberConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -40,15 +38,15 @@ public class AtomixProperties {
     private boolean enabled = true;
 
     /**
-     * The local member.
+     * The atomix local member.
      */
-    @NotNull
+    //@NotNull
     private MemberConfig localMember;
 
     /**
-     * The nodes to connect to.
+     * The atomix nodes to connect to.
      */
-    @NotNull
+    //@NotNull
     private List<MemberConfig> members;
 
     public boolean isEnabled() {

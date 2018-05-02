@@ -224,43 +224,5 @@
 				</pluginRepository>
 			</pluginRepositories>
 		</profile>
-
-		<profile>
-			<id>agent</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>io.atomix</groupId>
-					<artifactId>atomix-agent</artifactId>
-					<version>2.1.0-SNAPSHOT</version>
-				</dependency>
-			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.6.0</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>java</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<mainClass>io.atomix.agent.AtomixAgent</mainClass>
-							<arguments>
-								<argument>--persistent-members</argument>
-            					<argument>test@localhost:5679</argument>
-            					<argument>test@localhost:5679</argument>
-          					</arguments>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 	</profiles>
 </project>

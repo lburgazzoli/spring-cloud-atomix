@@ -28,9 +28,9 @@ import org.springframework.boot.actuate.health.Health;
  * @since 2.0.0
  */
 public class AtomixHealthIndicator extends AbstractHealthIndicator {
-    private final Atomix atomix;
+    private final AtomixClient atomix;
 
-    public AtomixHealthIndicator(Atomix atomix) {
+    public AtomixHealthIndicator(AtomixClient atomix) {
         this.atomix = atomix;
     }
 
@@ -45,13 +45,13 @@ public class AtomixHealthIndicator extends AbstractHealthIndicator {
 
             builder.withDetail(
                 "memberId",
-                this.atomix.membershipService().getLocalMember().id().id());
+                this.atomix.getLocalMember().id().id());
             builder.withDetail(
                 "rack",
-                this.atomix.membershipService().getLocalMember().rack());
+                this.atomix.getLocalMember().rack());
             builder.withDetail(
                 "zone",
-                this.atomix.membershipService().getLocalMember().zone());
+                this.atomix.getLocalMember().zone());
             builder.withDetail(
                 "running",
                 this.atomix.isRunning());

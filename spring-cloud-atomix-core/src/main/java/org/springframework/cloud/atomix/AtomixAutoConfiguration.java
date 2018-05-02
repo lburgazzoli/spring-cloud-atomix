@@ -44,14 +44,14 @@ public class AtomixAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(AtomixAutoConfiguration.class);
 
     @Bean
-    @ConditionalOnMissingBean
-    public AtomixProperties zookeeperProperties() {
+    @ConditionalOnMissingBean(AtomixProperties.class)
+    public AtomixProperties atomixProperties() {
         return new AtomixProperties();
     }
 
-    @Bean(destroyMethod = "stop")
+    @Bean(initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean
-    public Atomix curatorFramework(AtomixProperties properties) throws Exception {
+    public AtomixClient atomix(AtomixProperties properties) throws Exception {
         final AtomixConfig config = new AtomixConfig();
 
         // This is an ephemeral/client instance, not a data node
@@ -65,24 +65,17 @@ public class AtomixAutoConfiguration {
 
         LOGGER.trace("Blocking until connected to atomix");
 
-        return Atomix.builder(config).build().start()
-            .thenApply(
-                atomix -> {
-                    LOGGER.trace("connected to atomix");
-                    return atomix;
-                }
-            )
-            .join();
+        return new AtomixClient(Atomix.builder(config).build());
     }
 
     @Configuration
     @ConditionalOnClass(Endpoint.class)
-    protected static class ZookeeperHealthConfig {
+    protected static class AtomixHealthConfig {
         @Bean
         @ConditionalOnMissingBean
         @ConditionalOnBean(Atomix.class)
         @ConditionalOnEnabledHealthIndicator("atomix")
-        public AtomixHealthIndicator zookeeperHealthIndicator(Atomix atomix) {
+        public AtomixHealthIndicator atomixHealthIndicator(AtomixClient atomix) {
             return new AtomixHealthIndicator(atomix);
         }
     }
