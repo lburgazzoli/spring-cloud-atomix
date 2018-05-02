@@ -35,7 +35,7 @@ import org.springframework.util.SocketUtils;
  */
 public class SimpleTest {
 
-    @Ignore
+       @Ignore
 	@Test
 	public void test() throws Exception {
 	    final Logger logger = LoggerFactory.getLogger(getClass());
@@ -43,7 +43,7 @@ public class SimpleTest {
         final int clusterPort = SocketUtils.findAvailableTcpPort();
         final CountDownLatch latch = new CountDownLatch(2);
 
-        logger.info("******* Start cluster");
+        logger.info("******* Starting cluster");
         Atomix cluster = createAtomixCluster(clusterPort);
         cluster.start()
             .thenApply(
@@ -55,7 +55,7 @@ public class SimpleTest {
             )
             .join();
 
-        logger.info("####### Start client");        
+        logger.info("####### Starting client");        
         Atomix client = createAtomixClient(clientPort, clusterPort);
         client.start().thenApply(
             a -> {
@@ -78,15 +78,16 @@ public class SimpleTest {
 	private static Atomix createAtomixCluster(int clusterPort) {
         // build the atomix service
         return Atomix.builder()
+            .withClusterName("test-cluster")
             .withLocalMember(
-                Member.builder("_test-cluster")
-                    .withAddress("localhost:" + clusterPort)
-                    .withType(Member.Type.PERSISTENT)
+                Member.builder("_test_cluster")
+                    .withAddress("localhost", clusterPort)
+                    .withType(Member.Type.EPHEMERAL)
                     .build())
             .withMembers(
-                Member.builder("_test-cluster")
-                    .withType(Member.Type.PERSISTENT)
-                    .withAddress("localhost:" + clusterPort)
+                Member.builder("_test_cluster")
+                    .withType(Member.Type.EPHEMERAL)
+                    .withAddress("localhost", clusterPort)
                     .build())
             .withProfiles(
                 Profile.DATA_GRID
@@ -98,14 +99,14 @@ public class SimpleTest {
         // build the atomix service
         return Atomix.builder()
             .withLocalMember(
-                Member.builder("_test-client")
-                    .withAddress("localhost:" + clientPort)
+                Member.builder("_test_client")
+                    .withAddress("localhost", clientPort)
                     .withType(Member.Type.EPHEMERAL)
                     .build())
             .withMembers(
-                Member.builder("_test-cluster")
-                    .withType(Member.Type.PERSISTENT)
-                    .withAddress("localhost:" + clusterPort)
+                Member.builder("_test_cluster")
+                    .withType(Member.Type.EPHEMERAL)
+                    .withAddress("localhost", clusterPort)
                     .build())
             .withProfiles(
                 Profile.CLIENT
