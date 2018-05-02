@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import io.atomix.cluster.Member.Type;
 import io.atomix.cluster.MemberConfig;
 import io.atomix.cluster.MemberId;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -35,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Luca Burgazzoli
  */
 public class AtomixAutoConfigurationTests {
-
     @Ignore
 	@Test
 	public void testAtomixClientHasBeenInjected() {
@@ -46,8 +46,14 @@ public class AtomixAutoConfigurationTests {
                     AtomixAutoConfiguration.class
                 )
             )
+            .withSystemProperties(
+                "logging.level.root=INFO"
+            )
+            .withPropertyValues(
+                "banner.mode=OFF"
+            )
             .run((context) -> {
-                    assertThat(context).hasSingleBean(AtomixService.class);
+                    assertThat(context).hasSingleBean(AtomixClient.class);
                 }
             );
 	}
@@ -72,7 +78,7 @@ public class AtomixAutoConfigurationTests {
                 })
                 .collect(Collectors.toList());
 
-			AtomixProperties properties = new AtomixProperties();
+            AtomixProperties properties = new AtomixProperties();
             properties.setLocalMember(local);
             properties.setMembers(members);
             
@@ -80,7 +86,7 @@ public class AtomixAutoConfigurationTests {
 		}
 
         @Bean(initMethod = "start", destroyMethod = "stop") 
-        AtomixService testingService() throws Exception {
+        AtomixService testingService() {
 			return new AtomixService();
 		}
 	}

@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.atomix;
 
-import io.atomix.core.Atomix;
-import io.atomix.core.AtomixConfig;
-import io.atomix.core.profile.Profile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -29,6 +24,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.atomix.core.Atomix;
+import io.atomix.core.AtomixConfig;
+import io.atomix.core.profile.Profile;
 
 /**
  * {@link org.springframework.boot.autoconfigure.EnableAutoConfiguration Auto-configuration}
@@ -41,8 +40,6 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnAtomixEnabled
 @EnableConfigurationProperties
 public class AtomixAutoConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixAutoConfiguration.class);
-
     @Bean
     @ConditionalOnMissingBean(AtomixProperties.class)
     public AtomixProperties atomixProperties() {
@@ -62,8 +59,6 @@ public class AtomixAutoConfiguration {
 
         // add members of the cluster
         properties.getMembers().forEach(member -> config.getClusterConfig().addMember(member));
-
-        LOGGER.trace("Blocking until connected to atomix");
 
         return new AtomixClient(Atomix.builder(config).build());
     }

@@ -21,68 +21,50 @@ import java.util.Collection;
 import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
 import io.atomix.core.profile.Profile;
-import org.springframework.context.Lifecycle;
 import org.springframework.util.SocketUtils;
 
-public class AtomixService implements Lifecycle {
-    private final Atomix atomix;
-
+public class AtomixService extends AtomixClient {
     public AtomixService() {
+        super(
+            createAtomixInstance()
+        );    
+    }
+
+    public int port() {
+        return atomix().membershipService().getLocalMember().address().port();
+    }
+
+    // ************************
+    // Access Atomix services
+    // ************************
+
+    public Collection<Member> getMembers() {
+        return atomix().membershipService().getMembers();
+    }
+
+    // ************************
+    // Helpers
+    // ************************
+
+    private static Atomix createAtomixInstance() {
         // dynamically find a free port
         final int port = SocketUtils.findAvailableTcpPort();
 
         // build the atomix service
-        this.atomix = Atomix.builder()
+        return Atomix.builder()
             .withLocalMember(
-                Member.builder("test")
+                Member.builder("_test-service")
                     .withAddress("localhost:" + port)
-                    .withType(Member.Type.EPHEMERAL)
+                    .withType(Member.Type.PERSISTENT)
                     .build())
             .withMembers(
-                Member.builder("test")
-                    .withType(Member.Type.EPHEMERAL)
+                Member.builder("_test-service")
+                    .withType(Member.Type.PERSISTENT)
                     .withAddress("localhost:" + port)
                     .build())
             .withProfiles(
                 Profile.DATA_GRID
             )
             .build();
-    }
-
-    public int port() {
-        return this.atomix.membershipService().getLocalMember().address().port();
-    }
-
-    public Atomix atomix() {
-        return this.atomix;
-    }
-
-    @Override
-    public void start() {
-        if (!this.atomix.isRunning()) {
-            this.atomix.start().join();
-        }
-    }
-
-    @Override
-    public void stop() {
-        this.atomix.stop().join();
-    }
-
-    @Override
-    public boolean isRunning() {
-        return this.atomix.isRunning();
-    }
-
-    // ************************
-    // Access Atomix services
-    // ************************
-    
-    public Member getLocalMember() {
-        return this.atomix.membershipService().getLocalMember();
-    }
-
-    public Collection<Member> getMembers() {
-        return this.atomix.membershipService().getMembers();
     }
 }

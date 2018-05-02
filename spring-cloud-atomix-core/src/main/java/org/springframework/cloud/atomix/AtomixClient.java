@@ -24,16 +24,16 @@ import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
 
 public class AtomixClient implements Lifecycle {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixClient.class);
-
+    private final Logger logger;
     private final Atomix atomix;
 
     public AtomixClient(Atomix atomix) {
+        this.logger = LoggerFactory.getLogger(getClass());
         this.atomix = atomix;
     }
 
     // ************************
-    // Lyfecycle
+    // Lifecycle
     // ************************
 
     @Override
@@ -42,10 +42,11 @@ public class AtomixClient implements Lifecycle {
             return;
         }
 
+        logger.debug("starting atomix (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
         this.atomix.start()
             .thenApply(
                 atomix -> {
-                    LOGGER.debug("connected to atomix cluster");
+                    logger.debug("started atomix cluster (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
                     return atomix;
                 }
             )
@@ -58,9 +59,10 @@ public class AtomixClient implements Lifecycle {
             return;
         }
 
+        logger.debug("stopping atomix (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
         this.atomix.stop().thenRun(
             () -> {
-                LOGGER.debug("disconnected from atomix cluster");
+                logger.debug("stopped atomix cluster (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
             }
         ).join();
     }
@@ -76,5 +78,13 @@ public class AtomixClient implements Lifecycle {
     
     public Member getLocalMember() {
         return this.atomix.membershipService().getLocalMember();
+    }
+
+    // ************************
+    // Helpers
+    // ************************
+    
+    protected Atomix atomix() {
+        return this.atomix;
     }
 } 
