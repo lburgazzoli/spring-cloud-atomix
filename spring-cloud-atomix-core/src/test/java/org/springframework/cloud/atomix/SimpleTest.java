@@ -35,10 +35,10 @@ import org.springframework.util.SocketUtils;
  */
 public class SimpleTest {
 
-       @Ignore
-	@Test
-	public void test() throws Exception {
-	    final Logger logger = LoggerFactory.getLogger(getClass());
+    @Ignore
+    @Test
+    public void test() throws Exception {
+        final Logger logger = LoggerFactory.getLogger(getClass());
         final int clientPort = SocketUtils.findAvailableTcpPort();
         final int clusterPort = SocketUtils.findAvailableTcpPort();
         final CountDownLatch latch = new CountDownLatch(2);
@@ -73,9 +73,9 @@ public class SimpleTest {
         logger.info("####### Stop cluster");
         cluster.stop().join();
 
-	}
+    }
 
-	private static Atomix createAtomixCluster(int clusterPort) {
+    private static Atomix createAtomixCluster(int clusterPort) {
         // build the atomix service
         return Atomix.builder()
             .withClusterName("test-cluster")
@@ -98,6 +98,7 @@ public class SimpleTest {
     private static Atomix createAtomixClient(int clientPort, int clusterPort) {
         // build the atomix service
         return Atomix.builder()
+            .withClusterName("test-cluster")
             .withLocalMember(
                 Member.builder("_test_client")
                     .withAddress("localhost", clientPort)
