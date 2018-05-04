@@ -28,7 +28,6 @@ import org.springframework.util.SocketUtils;
 public class AtomixTestConfig {
     @Bean
     AtomixProperties atomixProperties(AtomixService testingService) {
-        // Local client does not need to have host/port
         MemberConfig local = new MemberConfig();
         local.setAddress("localhost:" + SocketUtils.findAvailableTcpPort());
         local.setType(Member.Type.EPHEMERAL);
