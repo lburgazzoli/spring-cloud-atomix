@@ -46,9 +46,9 @@ public class AtomixAutoConfiguration {
         return new AtomixProperties();
     }
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
+    @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean
-    public AtomixClient atomix(AtomixProperties properties) throws Exception {
+    public AtomixClient atomixClient(AtomixProperties properties) throws Exception {
         final AtomixConfig config = new AtomixConfig();
 
         // This is an ephemeral/client instance, not a data node

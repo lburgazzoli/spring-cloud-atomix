@@ -17,12 +17,11 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} | %-40thread | %-5level|%logger - %msg%n</pattern>
-            <!--<pattern>%-5level - %msg%n</pattern> -->
         </encoder>
     </appender>
 
     <!-- atomix -->
-    <logger name="io.atomix" level="DEBUG"/>
+    <logger name="io.atomix" level="INFO"/>
     <logger name="io.atomix.protocols.backup.partition" level="WARN"/>
 
     <!-- spring-cloud-atomix -->

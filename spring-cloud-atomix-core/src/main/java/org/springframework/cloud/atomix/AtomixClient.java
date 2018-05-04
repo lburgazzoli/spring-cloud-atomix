@@ -16,12 +16,11 @@
 
 package org.springframework.cloud.atomix;
 
+import io.atomix.cluster.Member;
+import io.atomix.core.Atomix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.Lifecycle;
-
-import io.atomix.cluster.Member;
-import io.atomix.core.Atomix;
 
 public class AtomixClient implements Lifecycle {
     private final Logger logger;
@@ -44,10 +43,9 @@ public class AtomixClient implements Lifecycle {
 
         logger.debug("starting atomix (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
         this.atomix.start()
-            .thenApply(
-                atomix -> {
+            .thenRun(
+                () -> {
                     logger.debug("started atomix cluster (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
-                    return atomix;
                 }
             )
             .join();

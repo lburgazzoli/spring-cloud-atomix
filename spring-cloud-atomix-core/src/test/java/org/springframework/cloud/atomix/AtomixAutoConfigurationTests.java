@@ -16,19 +16,9 @@
 
 package org.springframework.cloud.atomix;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import io.atomix.cluster.Member.Type;
-import io.atomix.cluster.MemberConfig;
-import io.atomix.cluster.MemberId;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,13 +26,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Luca Burgazzoli
  */
 public class AtomixAutoConfigurationTests {
-    @Ignore
 	@Test
 	public void testAtomixClientHasBeenInjected() {
         new ApplicationContextRunner()
             .withConfiguration(
                 AutoConfigurations.of(
-                    AtomixAutoConfigurationTests.TestConfig.class,
+                    AtomixTestConfig.class,
                     AtomixAutoConfiguration.class
                 )
             )
@@ -53,41 +42,10 @@ public class AtomixAutoConfigurationTests {
                 "banner.mode=OFF"
             )
             .run((context) -> {
-                    assertThat(context).hasSingleBean(AtomixClient.class);
+                    assertThat(context).getBeans(AtomixClient.class).hasSize(2);
+                    assertThat(context).getBeans(AtomixClient.class).containsKeys("testing-service", "atomix-client");
+                    assertThat(context).hasSingleBean(AtomixService.class);
                 }
             );
-	}
-
-	static class TestConfig {
-		@Bean
-		AtomixProperties atomixProperties(AtomixService testingService) {
-            // Local client does not need to have host/port
-            MemberConfig local = new MemberConfig();
-            local.setAddress("localhost:" + SocketUtils.findAvailableTcpPort());
-            local.setType(Type.EPHEMERAL);
-            local.setId(MemberId.from("client"));
-
-            List<MemberConfig> members = testingService.getMembers().stream()
-                .map(m -> {
-                    MemberConfig config = new MemberConfig();
-                    config.setId(m.id());
-                    config.setType(m.type());
-                    config.setAddress(m.address());
-
-                    return config;
-                })
-                .collect(Collectors.toList());
-
-            AtomixProperties properties = new AtomixProperties();
-            properties.setLocalMember(local);
-            properties.setMembers(members);
-            
-			return properties;
-		}
-
-        @Bean(initMethod = "start", destroyMethod = "stop") 
-        AtomixService testingService() {
-			return new AtomixService();
-		}
 	}
 }
