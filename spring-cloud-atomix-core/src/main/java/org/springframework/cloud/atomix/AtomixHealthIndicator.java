@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.atomix;
 
-import io.atomix.core.Atomix;
+import io.atomix.cluster.Member;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 
@@ -36,27 +36,24 @@ public class AtomixHealthIndicator extends AbstractHealthIndicator {
 
     @Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
-        try {
-            if (this.atomix.isRunning()) {
-                builder.down().withDetail("error", "Atomix client not running");
-            } else {
-                builder.up();
-            }
-
-            builder.withDetail(
-                "memberId",
-                this.atomix.getLocalMember().id().id());
-            builder.withDetail(
-                "rack",
-                this.atomix.getLocalMember().rack());
-            builder.withDetail(
-                "zone",
-                this.atomix.getLocalMember().zone());
-            builder.withDetail(
-                "running",
-                this.atomix.isRunning());
-        } catch (Exception e) {
-            builder.down(e);
+        if (this.atomix.isRunning()) {
+            builder.down().withDetail("error", "Atomix client not running");
+        } else {
+            builder.up();
         }
+
+        final Member member = this.atomix.getLocalMember();
+
+        builder.withDetail("memberId", member.id().id());
+        builder.withDetail("rack", member.rack());
+        builder.withDetail("zone", member.zone());
+
+        try {
+            builder.withDetail("state", member.getState().name());
+        } catch (UnsupportedOperationException e) {
+            // ignore
+        }
+
+        member.metadata().forEach(builder::withDetail);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.atomix;
+package org.springframework.cloud.atomix.config;
 
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -22,27 +22,40 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * @author Luca Burgazzoli
- */
-public class AtomixAutoConfigurationTests {
-	@Test
-	public void testAtomixClientHasBeenInjected() {
+public class AtomixConfigAutoConfigurationTest {
+    @Test
+    public void testAtomixEnabledFalseDoesNotLoadAtomixConfigAutoConfiguration() {
         new ApplicationContextRunner()
             .withConfiguration(
                 AutoConfigurations.of(
-                    AtomixTestConfig.class,
-                    AtomixAutoConfiguration.class
+                    AtomixConfigAutoConfiguration.class
                 )
             )
             .withPropertyValues(
-                "banner.mode=OFF"
+                "banner.mode=OFF",
+                "spring.cloud.atomix.enabled=false"
             )
             .run((context) -> {
-                    assertThat(context).getBeans(AtomixClient.class).hasSize(2);
-                    assertThat(context).getBeans(AtomixClient.class).containsKeys("testing-service", "atomix-client");
-                    assertThat(context).hasSingleBean(AtomixService.class);
+                    assertThat(context).doesNotHaveBean(AtomixConfigAutoConfiguration.class);
                 }
             );
-	}
+    }
+
+    @Test
+    public void testAtomixConfigEnabledFalseDoesNotLoadAtomixConfigAutoConfiguration() {
+        new ApplicationContextRunner()
+            .withConfiguration(
+                AutoConfigurations.of(
+                    AtomixConfigAutoConfiguration.class
+                )
+            )
+            .withPropertyValues(
+                "banner.mode=OFF",
+                "spring.cloud.atomix.config.enabled=false"
+            )
+            .run((context) -> {
+                    assertThat(context).doesNotHaveBean(AtomixConfigAutoConfiguration.class);
+                }
+            );
+    }
 }

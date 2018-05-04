@@ -1,0 +1,7 @@
+# Auto Configuration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    org.springframework.cloud.atomix.config.AtomixConfigAutoConfiguration
+
+# Bootstrap Configuration
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+    org.springframework.cloud.atomix.config.AtomixConfigBootstrapConfiguration

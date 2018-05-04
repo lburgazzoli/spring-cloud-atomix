@@ -18,6 +18,7 @@ package org.springframework.cloud.atomix;
 
 import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
+import io.atomix.core.tree.DocumentTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.Lifecycle;
@@ -76,6 +77,10 @@ public class AtomixClient implements Lifecycle {
     
     public Member getLocalMember() {
         return this.atomix.membershipService().getLocalMember();
+    }
+
+    public <T> DocumentTree<T> getDocumentTree(String name) {
+        return this.atomix.getDocumentTree(name);
     }
 
     // ************************
