@@ -17,6 +17,7 @@
 package org.springframework.cloud.atomix.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.atomix.AtomixAutoConfiguration;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.atomix.ConditionalOnAtomixEnabled;
@@ -33,17 +34,25 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnAtomixEnabled
 @Import(AtomixAutoConfiguration.class)
 public class AtomixConfigBootstrapConfiguration {
-    @Bean
-    @ConditionalOnMissingBean
-    public AtomixPropertySourceLocator atomixPropertySourceLocator(
+
+    @Configuration
+    @EnableConfigurationProperties
+    @Import(AtomixAutoConfiguration.class)
+    @ConditionalOnAtomixConfigEnabled
+    protected static class AtomixPropertySourceConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        public AtomixPropertySourceLocator atomixPropertySourceLocator(
             AtomixClient client,
             AtomixConfigProperties properties) {
-        return new AtomixPropertySourceLocator(client, properties);
-    }
+            return new AtomixPropertySourceLocator(client, properties);
+        }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public AtomixConfigProperties atomixConfigProperties() {
-        return new AtomixConfigProperties();
+        @Bean
+        @ConditionalOnMissingBean
+        public AtomixConfigProperties atomixConfigProperties() {
+            return new AtomixConfigProperties();
+        }
     }
 }

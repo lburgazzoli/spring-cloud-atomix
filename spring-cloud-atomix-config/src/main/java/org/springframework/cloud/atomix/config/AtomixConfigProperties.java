@@ -46,12 +46,6 @@ public class AtomixConfigProperties {
     private String defaultContext = "application";
 
     /**
-     * Separator for profile appended to the application name
-     */
-    @NotEmpty
-    private String profileSeparator = ",";
-
-    /**
      * Throw exceptions during config lookup if true, otherwise, log warnings.
      */
     private boolean failFast = true;
@@ -78,14 +72,6 @@ public class AtomixConfigProperties {
 
     public void setDefaultContext(String defaultContext) {
         this.defaultContext = defaultContext;
-    }
-
-    public String getProfileSeparator() {
-        return profileSeparator;
-    }
-
-    public void setProfileSeparator(String profileSeparator) {
-        this.profileSeparator = profileSeparator;
     }
 
     public boolean isFailFast() {

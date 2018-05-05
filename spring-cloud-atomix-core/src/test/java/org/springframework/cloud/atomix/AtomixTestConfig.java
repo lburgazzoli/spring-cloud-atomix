@@ -19,19 +19,17 @@ package org.springframework.cloud.atomix;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.atomix.cluster.Member;
 import io.atomix.cluster.MemberConfig;
-import io.atomix.cluster.MemberId;
+import io.atomix.utils.net.Address;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.SocketUtils;
 
 public class AtomixTestConfig {
     @Bean
     AtomixProperties atomixProperties(AtomixService testingService) {
-        MemberConfig local = new MemberConfig();
-        local.setAddress("localhost:" + SocketUtils.findAvailableTcpPort());
-        local.setType(Member.Type.EPHEMERAL);
-        local.setId(MemberId.from("client"));
+        AtomixProperties.LocalMemberConfig local = new AtomixProperties.LocalMemberConfig();
+        local.setAddress(Address.from("localhost", SocketUtils.findAvailableTcpPort()));
+        local.setId("client");
 
         List<MemberConfig> members = testingService.getMembers().stream()
             .map(m -> {

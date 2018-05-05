@@ -46,7 +46,7 @@ public class AtomixClient implements Lifecycle {
         this.atomix.start()
             .thenRun(
                 () -> {
-                    logger.debug("started atomix cluster (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
+                    logger.debug("started atomix (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
                 }
             )
             .join();
@@ -61,7 +61,7 @@ public class AtomixClient implements Lifecycle {
         logger.debug("stopping atomix (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
         this.atomix.stop().thenRun(
             () -> {
-                logger.debug("stopped atomix cluster (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
+                logger.debug("stopped atomix (local: {}, members: {})", atomix.membershipService().getLocalMember(), atomix.membershipService().getMembers());
             }
         ).join();
     }

@@ -31,13 +31,9 @@ public class AtomixService extends AtomixClient {
         );    
     }
 
-    public int port() {
-        return atomix().membershipService().getLocalMember().address().port();
+    public int getPort() {
+        return getLocalMember().address().port();
     }
-
-    // ************************
-    // Access Atomix services
-    // ************************
 
     public Collection<Member> getMembers() {
         return atomix().membershipService().getMembers();

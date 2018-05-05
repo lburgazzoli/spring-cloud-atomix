@@ -133,7 +133,9 @@ public class AtomixPropertySourceLocator implements PropertySourceLocator {
 
     private Map<String, Object> traverse(DocumentTree<String> tree, String path, Map<String, Object> properties) {
         try {
-            tree.getChildren(DocumentPath.from("root", path)).forEach(
+            String fullPath = "root" + AtomixConstants.PATH_SEPARATOR + path;
+
+            tree.getChildren(DocumentPath.from(fullPath)).forEach(
                 (k, v) -> {
                     properties.put(k, v.value());
 

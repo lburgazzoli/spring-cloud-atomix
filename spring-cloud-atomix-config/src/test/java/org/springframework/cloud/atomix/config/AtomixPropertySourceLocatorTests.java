@@ -19,8 +19,10 @@ package org.springframework.cloud.atomix.config;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.atomix.cluster.Member;
+import io.atomix.core.Atomix;
+import io.atomix.core.profile.Profile;
 import io.atomix.core.tree.DocumentPath;
 import org.junit.After;
 import org.junit.Before;
@@ -31,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -39,21 +40,20 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DirtiesContext
 public class AtomixPropertySourceLocatorTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(AtomixPropertySourceLocatorTests.class);
     private static final String ROOT = UUID.randomUUID().toString();
     private static final String APPL_CONTEXT = "application";
     private static final String TEST_CONTEXT = "test-application";
 
-    private AtomixService atomixService;
-    private AtomixClient client;
-    private AtomixConfigProperties properties;
+    private AtomixService atomix;
     private ConfigurableApplicationContext context;
-    private ConfigurableEnvironment environment;
 
     // *****************
     // Test setup
@@ -61,30 +61,30 @@ public class AtomixPropertySourceLocatorTests {
 
     @Before
     public void setUp() {
-        this.atomixService = new AtomixService();
-        this.atomixService.start();
-        this.atomixService.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", APPL_CONTEXT, "props.p1"), "v1");
-        this.atomixService.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", APPL_CONTEXT, "props.p2"), "v2");
-        this.atomixService.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", TEST_CONTEXT, "props.p2"), "v2.1");
+        this.atomix = new AtomixService();
+        this.atomix.start();
+        this.atomix.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", APPL_CONTEXT, "props.p1"), "v1");
+        this.atomix.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", APPL_CONTEXT, "props.p2"), "v2");
+        this.atomix.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", TEST_CONTEXT, "props.p2"), "v2.1");
 
         this.context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run(
             "--banner.mode=OFF",
-            "--spring.cloud.atomix.members[0].address=" + atomixService.getLocalMember().address().toString(),
-            "--spring.cloud.atomix.members[0].id=" +  atomixService.getLocalMember().id().id(),
-            "--spring.cloud.atomix.members[0].type=" + atomixService.getLocalMember().type().name(),
+            "--spring.cloud.atomix.local-member.address=" + "localhost:" + SocketUtils.findAvailableTcpPort(),
+            "--spring.cloud.atomix.members[0].address=" + "localhost:" + atomix.getPort(),
+            "--spring.cloud.atomix.members[0].id=" +  atomix.getLocalMember().id().id(),
+            "--spring.cloud.atomix.members[0].type=" + atomix.getLocalMember().type().name(),
             "--spring.cloud.atomix.config.root=" + ROOT,
             "--spring.application.name=" + TEST_CONTEXT
         );
-
-        this.client = this.context.getBean(AtomixClient.class);
-        this.properties = this.context.getBean(AtomixConfigProperties.class);
-        this.environment = this.context.getEnvironment();
     }
 
     @After
     public void tearDown() {
-        if (this.atomixService != null) {
-            this.atomixService.stop();
+        if (this.context != null) {
+            this.context.close();
+        }
+        if (this.atomix != null) {
+            this.atomix.stop();
         }
     }
 
@@ -94,22 +94,23 @@ public class AtomixPropertySourceLocatorTests {
 
     @Test
     public void checkKeyValues() {
-        assertThat(this.environment.getProperty("props.p1")).isEqualTo("v1");
-        assertThat(this.environment.getProperty("props.p2")).isEqualTo("v2.1");
+        assertThat(context.getEnvironment().getProperty("props.p1")).isEqualTo("v1");
+        assertThat(context.getEnvironment().getProperty("props.p2")).isEqualTo("v2.1");
     }
 
-    @Ignore
+    @Ignore // FIXME broken tests with boot 2.0.0
     @Test
     public void propertyLoadedAndUpdated() throws Exception {
-        assertThat(this.environment.getProperty("props.p1")).isEqualTo("v1");
+        assertThat(context.getEnvironment().getProperty("props.p1")).isEqualTo("v1");
 
-        this.atomixService.getDocumentTree(ROOT).set(DocumentPath.from("root", APPL_CONTEXT, "props.p1"), "v1.1");
+        this.atomix.getDocumentTree(ROOT).set(DocumentPath.from("root", APPL_CONTEXT, "props.p1"), "v1.1");
 
-        CountDownLatch latch = this.context.getBean(CountDownLatch.class);
+        CountDownLatch latch = context.getBean(CountDownLatch.class);
+        latch.await();
         boolean receivedEvent = latch.await(15, TimeUnit.SECONDS);
         assertThat(receivedEvent).isTrue();
 
-        assertThat(this.environment.getProperty("props.p1")).isEqualTo("v1.1");
+        assertThat(context.getEnvironment().getProperty("props.p1")).isEqualTo("v1.1");
     }
 
     // *****************
@@ -119,8 +120,6 @@ public class AtomixPropertySourceLocatorTests {
     @Configuration
     @EnableAutoConfiguration
     static class Config {
-        private AtomicBoolean ready = new AtomicBoolean(false);
-
         @Bean
         public CountDownLatch countDownLatch() {
             return new CountDownLatch(1);

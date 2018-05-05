@@ -69,7 +69,7 @@ public class AtomixConfigWatcher implements Lifecycle, DocumentTreeListener<Stri
             this.tree.addListener(this);
 
             //for (String context: contexts) {
-            //    this.tree.addListener(DocumentPath.from("root", context), this);
+            //    this.tree.addListener(DocumentPath.from("root" + AtomixConstants.PATH_SEPARATOR + context), this);
             //}
         }
     }

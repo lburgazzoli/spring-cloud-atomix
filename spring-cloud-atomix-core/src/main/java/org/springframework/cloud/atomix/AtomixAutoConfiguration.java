@@ -17,10 +17,14 @@
 package org.springframework.cloud.atomix;
 
 import java.util.UUID;
-import javax.lang.model.element.TypeParameterElement;
 
 import io.atomix.cluster.Member;
+import io.atomix.cluster.MemberConfig;
+import io.atomix.core.Atomix;
+import io.atomix.core.AtomixConfig;
+import io.atomix.core.profile.Profile;
 import io.atomix.utils.net.Address;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -29,11 +33,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import io.atomix.core.Atomix;
-import io.atomix.core.AtomixConfig;
-import io.atomix.core.profile.Profile;
-import org.springframework.util.SocketUtils;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.convert.converter.Converter;
 
 /**
  * {@link org.springframework.boot.autoconfigure.EnableAutoConfiguration Auto-configuration}
@@ -52,16 +53,22 @@ public class AtomixAutoConfiguration {
         return new AtomixProperties();
     }
 
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean
     public AtomixClient atomixClient(AtomixProperties properties) {
         final AtomixConfig config = new AtomixConfig();
+        final MemberConfig local = new MemberConfig();
+
+        local.setType(Member.Type.EPHEMERAL);
+        local.setAddress(properties.getLocalMember().getAddress());
+        local.setId(properties.getLocalMember().getOrGenerateId());
 
         // This is an ephemeral/client instance, not a data node
         config.addProfile(Profile.CLIENT);
 
         // set the local member
-        config.getClusterConfig().setLocalMember(properties.getLocalMember());
+        config.getClusterConfig().setLocalMember(local);
 
         // add members of the cluster
         properties.getMembers().forEach(member -> config.getClusterConfig().addMember(member));
@@ -79,5 +86,15 @@ public class AtomixAutoConfiguration {
         public AtomixHealthIndicator atomixHealthIndicator(AtomixClient atomix) {
             return new AtomixHealthIndicator(atomix);
         }
+    }
+
+    @Bean
+    public Converter<String, Address> atomixAddressConverters() {
+        return new Converter<String, Address>() {
+            @Override
+            public Address convert(String source) {
+                return Address.from(source);
+            }
+        };
     }
 }

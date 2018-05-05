@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import io.atomix.cluster.Member;
 import io.atomix.cluster.MemberConfig;
 import io.atomix.utils.net.Address;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -44,7 +43,7 @@ public class AtomixProperties {
     /**
      * The atomix local member.
      */
-    private MemberConfig localMember = defaultLocalMember();
+    private LocalMemberConfig localMember = new LocalMemberConfig();
 
     /**
      * The atomix nodes to connect to.
@@ -59,11 +58,11 @@ public class AtomixProperties {
         this.enabled = enabled;
     }
 
-    public MemberConfig getLocalMember() {
+    public LocalMemberConfig getLocalMember() {
         return localMember;
     }
 
-    public void setLocalMember(MemberConfig localMember) {
+    public void setLocalMember(LocalMemberConfig localMember) {
         this.localMember = localMember;
     }
 
@@ -71,16 +70,28 @@ public class AtomixProperties {
         return members;
     }
 
-    /**
-     * Helper to generate a default local member with a random id and listening
-     * on a random port.
-     */
-    private static MemberConfig defaultLocalMember() {
-        MemberConfig config = new MemberConfig();
-        config.setType(Member.Type.EPHEMERAL);
-        config.setAddress(Address.from(0));
-        config.setId(UUID.randomUUID().toString());
+    public static class LocalMemberConfig {
+        private String id;
+        private Address address;
 
-        return config;
+        public String getId() {
+            return id;
+        }
+
+        public String getOrGenerateId() {
+            return id != null ? id : UUID.randomUUID().toString();
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public Address getAddress() {
+            return address;
+        }
+
+        public void setAddress(Address address) {
+            this.address = address;
+        }
     }
 }
