@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.atomix;
 
-import java.util.UUID;
-
 import io.atomix.cluster.Member;
 import io.atomix.cluster.MemberConfig;
 import io.atomix.core.Atomix;

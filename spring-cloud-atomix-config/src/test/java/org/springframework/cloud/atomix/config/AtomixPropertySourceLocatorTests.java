@@ -70,7 +70,7 @@ public class AtomixPropertySourceLocatorTests {
         this.context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run(
             "--banner.mode=OFF",
             "--spring.cloud.atomix.local-member.address=" + "localhost:" + SocketUtils.findAvailableTcpPort(),
-            "--spring.cloud.atomix.members[0].address=" + "localhost:" + atomix.getPort(),
+            "--spring.cloud.atomix.members[0].address=" + "localhost:" + atomix.getLocalMember().address().port(),
             "--spring.cloud.atomix.members[0].id=" +  atomix.getLocalMember().id().id(),
             "--spring.cloud.atomix.members[0].type=" + atomix.getLocalMember().type().name(),
             "--spring.cloud.atomix.config.root=" + ROOT,

@@ -77,7 +77,7 @@ public class AtomixPropertySourceLocator implements PropertySourceLocator {
     public PropertySource<?> locate(Environment environment) {
         if (environment instanceof ConfigurableEnvironment) {
             final ConfigurableEnvironment env = (ConfigurableEnvironment) environment;
-            final String appName = env.getProperty(AtomixConstants.PROPERTY_SPRING_APPLICATION_NAME, this.properties.getDefaultContext());
+            final String appName = env.getProperty(AtomixConfigConstants.PROPERTY_SPRING_APPLICATION_NAME, this.properties.getDefaultContext());
 
             // Set-up defaults
             setupContext(contexts, env.getActiveProfiles(), this.properties.getDefaultContext());
@@ -87,7 +87,7 @@ public class AtomixPropertySourceLocator implements PropertySourceLocator {
                 setupContext(contexts, env.getActiveProfiles(), appName);
             }
 
-            CompositePropertySource composite = new CompositePropertySource(AtomixConstants.NAME);
+            CompositePropertySource composite = new CompositePropertySource(AtomixConfigConstants.NAME);
             Collections.reverse(contexts);
 
             LOGGER.debug("Context load order: {}", contexts);
@@ -118,7 +118,7 @@ public class AtomixPropertySourceLocator implements PropertySourceLocator {
         contexts.add(item);
 
         for (String profile : profiles) {
-            contexts.add(item + AtomixConstants.PROFILE_SEPARATOR + profile);
+            contexts.add(item + AtomixConfigConstants.PROFILE_SEPARATOR + profile);
         }
     }
 
@@ -133,13 +133,13 @@ public class AtomixPropertySourceLocator implements PropertySourceLocator {
 
     private Map<String, Object> traverse(DocumentTree<String> tree, String path, Map<String, Object> properties) {
         try {
-            String fullPath = "root" + AtomixConstants.PATH_SEPARATOR + path;
+            String fullPath = "root" + AtomixConfigConstants.PATH_SEPARATOR + path;
 
             tree.getChildren(DocumentPath.from(fullPath)).forEach(
                 (k, v) -> {
                     properties.put(k, v.value());
 
-                    traverse(tree, path + AtomixConstants.PATH_SEPARATOR + k, properties);
+                    traverse(tree, path + AtomixConfigConstants.PATH_SEPARATOR + k, properties);
                 }
             );
         } catch(NoSuchDocumentPathException e) {

@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.atomix.config;
 
-import java.util.Collection;
-
 import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
 import io.atomix.core.profile.Profile;
@@ -29,14 +27,6 @@ public class AtomixService extends AtomixClient {
         super(
             createAtomixInstance()
         );    
-    }
-
-    public int getPort() {
-        return getLocalMember().address().port();
-    }
-
-    public Collection<Member> getMembers() {
-        return atomix().membershipService().getMembers();
     }
 
     // ************************

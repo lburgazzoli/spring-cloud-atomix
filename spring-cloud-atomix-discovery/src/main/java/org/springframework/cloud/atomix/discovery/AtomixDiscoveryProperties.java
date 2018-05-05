@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.atomix.config;
+package org.springframework.cloud.atomix.discovery;
 
-import io.atomix.core.tree.DocumentPath;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * Defines configuration for service discovery and registration.
+ *
  * @author Luca Burgazzoli
  */
-public final class AtomixConstants {
-    public static final String NAME = "atomix";
-    public static final String PATH_SEPARATOR = DocumentPath.DEFAULT_SEPARATOR;
-    public static final String PROFILE_SEPARATOR = ":";
-    public static final String PROPERTY_SPRING_APPLICATION_NAME = "spring.application.name";
+@ConfigurationProperties("spring.cloud.atomix.discovery")
+public class AtomixDiscoveryProperties {
+    /**
+     * Is service discovery enabled
+     * */
+    private boolean enabled = true;
 
-    private AtomixConstants() {
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
