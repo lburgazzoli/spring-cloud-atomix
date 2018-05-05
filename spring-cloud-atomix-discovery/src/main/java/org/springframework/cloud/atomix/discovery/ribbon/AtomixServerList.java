@@ -35,10 +35,9 @@ public class AtomixServerList extends AbstractServerList<AtomixServer> {
     private final AtomixDiscoveryProperties properties;
     private String serviceId;
 
-    public AtomixServerList(AtomixClient client, AtomixDiscoveryProperties properties, String serviceId) {
+    public AtomixServerList(AtomixClient client, AtomixDiscoveryProperties properties) {
         this.client = Objects.requireNonNull(client);
         this.properties = Objects.requireNonNull(properties);
-        this.serviceId = Objects.requireNonNull(serviceId);
     }
 
     @Override
@@ -59,6 +58,10 @@ public class AtomixServerList extends AbstractServerList<AtomixServer> {
     private List<AtomixServer> getServers() {
         return AtomixDiscoveryUtils.getServices(client, properties)
             .filter(member -> {
+                if (serviceId == null) {
+                    return true;
+                }
+                
                 return Objects.equals(
                     member.metadata().get(AtomixConstants.META_SERVICE_ID), 
                     serviceId
