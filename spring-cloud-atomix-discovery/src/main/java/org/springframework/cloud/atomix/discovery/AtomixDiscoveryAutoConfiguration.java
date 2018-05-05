@@ -17,18 +17,42 @@
 package org.springframework.cloud.atomix.discovery;
 
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Luca Burgazzoli
- * @since 1.1.0
  */
 @Configuration
-@ConditionalOnZookeeperDiscoveryEnabled
+@ConditionalOnAtomixDiscoveryEnabled
 @AutoConfigureBefore({CommonsClientAutoConfiguration.class, SimpleDiscoveryClientAutoConfiguration.class})
 @EnableConfigurationProperties
-public class AtomixDiscoveryClientAutoConfiguration {
+public class AtomixDiscoveryAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AtomixDiscoveryProperties atomixDiscoveryProperties() {
+        return new AtomixDiscoveryProperties();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AtomixDiscoveryClient atomixDiscoveryClient(
+            AtomixClient client,
+            AtomixDiscoveryProperties discoveryProperties) {
+        return new AtomixDiscoveryClient(client, discoveryProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "spring.cloud.atomix.discovery.services-watch.enabled", matchIfMissing = true)
+    public AtomixServiceWatch atomixServiceWatch(AtomixClient client) {
+        return new AtomixServiceWatch(client);
+    }
 }

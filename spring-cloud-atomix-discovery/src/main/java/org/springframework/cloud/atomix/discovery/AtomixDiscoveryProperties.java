@@ -27,7 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Luca Burgazzoli
  */
 @ConfigurationProperties("spring.cloud.atomix.discovery")
-public class AtomixDiscoveryClientProperties {
+public class AtomixDiscoveryProperties {
     /**
      * Is service discovery enabled
      * */

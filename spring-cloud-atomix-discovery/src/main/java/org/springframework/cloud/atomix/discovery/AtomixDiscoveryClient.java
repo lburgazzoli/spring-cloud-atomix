@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableMap;
 import io.atomix.cluster.Member;
@@ -35,9 +34,9 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  */
 public class AtomixDiscoveryClient implements DiscoveryClient {
     private final AtomixClient client;
-    private final AtomixDiscoveryClientProperties properties;
+    private final AtomixDiscoveryProperties properties;
 
-    public AtomixDiscoveryClient(AtomixClient client, AtomixDiscoveryClientProperties properties) {
+    public AtomixDiscoveryClient(AtomixClient client, AtomixDiscoveryProperties properties) {
         this.client = client;
         this.properties = properties;
     }
@@ -49,14 +48,14 @@ public class AtomixDiscoveryClient implements DiscoveryClient {
 
     @Override
     public List<ServiceInstance> getInstances(String serviceId) {
-        return getMembers()
+        return AtomixDiscoveryUtils.getServices(this.client, this.properties)
             .map(member -> asInstance(member))
             .collect(Collectors.toList());
     }
 
     @Override
     public List<String> getServices() {
-        return getMembers()
+        return AtomixDiscoveryUtils.getServices(this.client, this.properties)
             .map(member -> member.metadata().get(AtomixConstants.META_SERVICE_ID))
             .distinct()
             .collect(Collectors.toList());
@@ -108,23 +107,5 @@ public class AtomixDiscoveryClient implements DiscoveryClient {
                 return ImmutableMap.copyOf(member.metadata());
             }
         };
-    }
-
-    private Stream<Member> getMembers() {
-        return client.getMembers().stream()
-            .filter(member -> {
-                return member.metadata().containsKey(AtomixConstants.META_SERVICE_ID);
-            })
-            .filter(member -> {
-                final Map<String, String> metadata = member.metadata();
-                final String serviceId = metadata.get(AtomixConstants.META_SERVICE_ID);
-                final AtomixDiscoveryClientProperties.ServiceConfig serviceConfig = properties.getServices().get(serviceId);
-
-                if (serviceConfig != null) {
-                    return metadata.isEmpty() || metadata.entrySet().containsAll(serviceConfig.getMetadata().entrySet());
-                }
-
-                return true;
-            });
     }
 }

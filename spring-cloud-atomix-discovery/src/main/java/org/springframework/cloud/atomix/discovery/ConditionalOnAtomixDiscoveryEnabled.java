@@ -32,5 +32,5 @@ import org.springframework.cloud.atomix.ConditionalOnAtomixEnabled;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @ConditionalOnAtomixEnabled
 @ConditionalOnProperty(value = "spring.cloud.atomix.discovery.enabled", matchIfMissing = true)
-public @interface ConditionalOnZookeeperDiscoveryEnabled {
+public @interface ConditionalOnAtomixDiscoveryEnabled {
 }

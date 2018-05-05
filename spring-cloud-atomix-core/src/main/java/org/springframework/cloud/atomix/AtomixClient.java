@@ -18,6 +18,7 @@ package org.springframework.cloud.atomix;
 
 import java.util.Collection;
 
+import io.atomix.cluster.ClusterMembershipService;
 import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
 import io.atomix.core.tree.DocumentTree;
@@ -78,15 +79,19 @@ public class AtomixClient implements Lifecycle {
     // ************************
     
     public Member getLocalMember() {
-        return this.atomix.membershipService().getLocalMember();
+        return getMemberhipService().getLocalMember();
     }
 
     public Collection<Member> getMembers() {
-        return this.atomix.membershipService().getMembers();
+        return getMemberhipService().getMembers();
     }
 
     public <T> DocumentTree<T> getDocumentTree(String name) {
         return this.atomix.getDocumentTree(name);
+    }
+
+    public ClusterMembershipService getMemberhipService() {
+        return this.atomix.membershipService();
     }
 
     // ************************

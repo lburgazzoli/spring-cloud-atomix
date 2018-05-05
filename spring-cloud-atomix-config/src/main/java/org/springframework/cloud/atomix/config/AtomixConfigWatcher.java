@@ -17,6 +17,7 @@
 package org.springframework.cloud.atomix.config;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.atomix.core.tree.DocumentTree;
@@ -52,7 +53,7 @@ public class AtomixConfigWatcher implements Lifecycle, DocumentTreeListener<Stri
 
     @Override
     public void event(DocumentTreeEvent<String> event) {
-        if (isRunning()) {
+        if (isRunning() && Objects.nonNull(this.publisher)) {
             this.publisher.publishEvent(new RefreshEvent(this, event, getEventDesc(event)));
         }
     }
