@@ -40,9 +40,9 @@
 		<module>spring-cloud-atomix-dependencies</module>
 		<module>spring-cloud-atomix-core</module>
 		<module>spring-cloud-atomix-config</module>
+		<module>spring-cloud-atomix-discovery</module>
 		<module>docs</module>
 		<!--
-		<module>spring-cloud-atomix-discovery</module>
 		<module>spring-cloud-atomix-binder</module>
 		<module>spring-cloud-atomix-sample</module>
 		<module>spring-cloud-starter-atomix</module>
