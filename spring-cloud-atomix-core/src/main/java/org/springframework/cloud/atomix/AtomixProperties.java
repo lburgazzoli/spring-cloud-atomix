@@ -16,9 +16,13 @@
 
 package org.springframework.cloud.atomix;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import io.atomix.cluster.Member;
 import io.atomix.cluster.MemberConfig;
+import io.atomix.utils.net.Address;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -40,14 +44,12 @@ public class AtomixProperties {
     /**
      * The atomix local member.
      */
-    //@NotNull
-    private MemberConfig localMember;
+    private MemberConfig localMember = defaultLocalMember();
 
     /**
      * The atomix nodes to connect to.
      */
-    //@NotNull
-    private List<MemberConfig> members;
+    private List<MemberConfig> members = new ArrayList<>();
 
     public boolean isEnabled() {
         return enabled;
@@ -69,7 +71,16 @@ public class AtomixProperties {
         return members;
     }
 
-    public void setMembers(List<MemberConfig> members) {
-        this.members = members;
+    /**
+     * Helper to generate a default local member with a random id and listening
+     * on a random port.
+     */
+    private static MemberConfig defaultLocalMember() {
+        MemberConfig config = new MemberConfig();
+        config.setType(Member.Type.EPHEMERAL);
+        config.setAddress(Address.from(0));
+        config.setId(UUID.randomUUID().toString());
+
+        return config;
     }
 }

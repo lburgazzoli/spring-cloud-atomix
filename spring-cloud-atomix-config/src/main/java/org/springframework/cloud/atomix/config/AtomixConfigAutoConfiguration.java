@@ -34,7 +34,7 @@ public class AtomixConfigAutoConfiguration {
     @Configuration
     @ConditionalOnClass(RefreshEndpoint.class)
     protected static class ZkRefreshConfiguration {
-        @Bean
+        @Bean(initMethod = "start", destroyMethod = "stop")
         @ConditionalOnAtomixConfigWatchEnabled
         public AtomixConfigWatcher configWatcher(
                 AtomixClient client,

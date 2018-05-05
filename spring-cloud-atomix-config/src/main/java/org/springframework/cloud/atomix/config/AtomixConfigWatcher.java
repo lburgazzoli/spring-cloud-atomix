@@ -16,12 +16,9 @@
 
 package org.springframework.cloud.atomix.config;
 
-import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
 
-import io.atomix.core.tree.DocumentPath;
 import io.atomix.core.tree.DocumentTree;
 import io.atomix.core.tree.DocumentTreeEvent;
 import io.atomix.core.tree.DocumentTreeListener;
@@ -29,6 +26,7 @@ import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.endpoint.event.RefreshEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.Lifecycle;
 
 /**
  * Class that registers a {@link DocumentTreeListener} for each context.
@@ -36,7 +34,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
  *
  * @author Luca Burgazzoli
  */
-public class AtomixConfigWatcher implements Closeable, DocumentTreeListener<String>, ApplicationEventPublisherAware {
+public class AtomixConfigWatcher implements Lifecycle, DocumentTreeListener<String>, ApplicationEventPublisherAware {
     private final AtomixClient client;
     private final AtomixConfigProperties configProperties;
     private final List<String> contexts;
@@ -54,7 +52,9 @@ public class AtomixConfigWatcher implements Closeable, DocumentTreeListener<Stri
 
     @Override
     public void event(DocumentTreeEvent<String> event) {
-        this.publisher.publishEvent(new RefreshEvent(this, event, getEventDesc(event)));
+        if (isRunning()) {
+            this.publisher.publishEvent(new RefreshEvent(this, event, getEventDesc(event)));
+        }
     }
 
     @Override
@@ -62,19 +62,20 @@ public class AtomixConfigWatcher implements Closeable, DocumentTreeListener<Stri
         this.publisher = publisher;
     }
 
-    @PostConstruct
+    @Override
     public void start() {
         if (this.running.compareAndSet(false, true)) {
             this.tree = client.getDocumentTree(configProperties.getRoot());
+            this.tree.addListener(this);
 
-            for (String context: contexts) {
-                this.tree.addListener(DocumentPath.from(context), this);
-            }
+            //for (String context: contexts) {
+            //    this.tree.addListener(DocumentPath.from("root", context), this);
+            //}
         }
     }
 
     @Override
-    public void close() {
+    public void stop() {
         if (this.running.compareAndSet(true, false)) {
             if (this.tree != null) {
                 this.tree.removeListener(this);
@@ -82,6 +83,11 @@ public class AtomixConfigWatcher implements Closeable, DocumentTreeListener<Stri
 
             this.tree = null;
         }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return this.running.get();
     }
 
     private String getEventDesc(DocumentTreeEvent<String> event) {

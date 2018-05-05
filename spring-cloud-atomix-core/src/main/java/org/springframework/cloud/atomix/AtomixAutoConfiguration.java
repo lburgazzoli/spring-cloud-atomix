@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.atomix;
 
+import java.util.UUID;
+import javax.lang.model.element.TypeParameterElement;
+
+import io.atomix.cluster.Member;
+import io.atomix.utils.net.Address;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -28,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import io.atomix.core.Atomix;
 import io.atomix.core.AtomixConfig;
 import io.atomix.core.profile.Profile;
+import org.springframework.util.SocketUtils;
 
 /**
  * {@link org.springframework.boot.autoconfigure.EnableAutoConfiguration Auto-configuration}
@@ -48,7 +54,7 @@ public class AtomixAutoConfiguration {
 
     @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean
-    public AtomixClient atomixClient(AtomixProperties properties) throws Exception {
+    public AtomixClient atomixClient(AtomixProperties properties) {
         final AtomixConfig config = new AtomixConfig();
 
         // This is an ephemeral/client instance, not a data node

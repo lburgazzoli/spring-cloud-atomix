@@ -16,14 +16,16 @@
 
 package org.springframework.cloud.atomix.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.atomix.AtomixAutoConfiguration;
+import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.atomix.ConditionalOnAtomixEnabled;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * {@link org.springframework.boot.autoconfigure.EnableAutoConfiguration Auto-configuration}
- * that registers a Atomix configuration watcher.
+ * Bootstrap Configuration for Atomix Configuration
  *
  * @author Luca Burgazzoli
  */
@@ -31,4 +33,17 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnAtomixEnabled
 @Import(AtomixAutoConfiguration.class)
 public class AtomixConfigBootstrapConfiguration {
+    @Bean
+    @ConditionalOnMissingBean
+    public AtomixPropertySourceLocator atomixPropertySourceLocator(
+            AtomixClient client,
+            AtomixConfigProperties properties) {
+        return new AtomixPropertySourceLocator(client, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AtomixConfigProperties atomixConfigProperties() {
+        return new AtomixConfigProperties();
+    }
 }

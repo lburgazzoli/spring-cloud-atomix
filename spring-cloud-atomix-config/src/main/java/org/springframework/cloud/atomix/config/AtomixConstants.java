@@ -16,12 +16,15 @@
 
 package org.springframework.cloud.atomix.config;
 
+import io.atomix.core.tree.DocumentPath;
+
 /**
  * @author Luca Burgazzoli
  */
 public final class AtomixConstants {
     public static final String NAME = "atomix";
-    public static final String SEPARATOR = "/";
+    public static final String PATH_SEPARATOR = DocumentPath.DEFAULT_SEPARATOR;
+    public static final String PROFILE_SEPARATOR = ":";
     public static final String PROPERTY_SPRING_APPLICATION_NAME = "spring.application.name";
 
     private AtomixConstants() {

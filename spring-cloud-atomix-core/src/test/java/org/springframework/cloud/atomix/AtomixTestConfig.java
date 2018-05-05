@@ -46,7 +46,7 @@ public class AtomixTestConfig {
 
         AtomixProperties properties = new AtomixProperties();
         properties.setLocalMember(local);
-        properties.setMembers(members);
+        properties.getMembers().addAll(members);
 
         return properties;
     }
