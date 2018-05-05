@@ -18,6 +18,9 @@ package org.springframework.cloud.atomix;
 
 public final class AtomixConstants {
     public static final String META_SERVICE_ID = "service.id";
+    public static final String META_SERVICE_HOST = "service.host";
+    public static final String META_SERVICE_PORT = "service.port";
+    public static final String META_SERVICE_SCHEME = "service.scheme";
 
     private AtomixConstants() {
     }

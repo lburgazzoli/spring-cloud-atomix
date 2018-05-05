@@ -16,9 +16,14 @@
 
 package org.springframework.cloud.atomix.discovery;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import io.atomix.cluster.Member;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.atomix.AtomixConstants;
@@ -30,9 +35,11 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  */
 public class AtomixDiscoveryClient implements DiscoveryClient {
     private final AtomixClient client;
+    private final AtomixDiscoveryClientProperties properties;
 
-    public AtomixDiscoveryClient(AtomixClient client) {
+    public AtomixDiscoveryClient(AtomixClient client, AtomixDiscoveryClientProperties properties) {
         this.client = client;
+        this.properties = properties;
     }
 
     @Override
@@ -42,26 +49,82 @@ public class AtomixDiscoveryClient implements DiscoveryClient {
 
     @Override
     public List<ServiceInstance> getInstances(String serviceId) {
-        return client.getMembers().stream()
-            .filter(member -> isService(member))
+        return getMembers()
             .map(member -> asInstance(member))
             .collect(Collectors.toList());
     }
 
     @Override
     public List<String> getServices() {
-        return client.getMembers().stream()
-            .filter(member -> isService(member))
+        return getMembers()
             .map(member -> member.metadata().get(AtomixConstants.META_SERVICE_ID))
             .distinct()
             .collect(Collectors.toList());
     }
 
-    private boolean isService(Member member) {
-        return member.metadata().containsKey(AtomixConstants.META_SERVICE_ID);
-    }
+    // ****************
+    // Helpers
+    // ****************
 
     private ServiceInstance asInstance(Member member) {
-        return null;
+        return new ServiceInstance() {
+            @Override
+            public String getServiceId() {
+                return member.metadata().get(AtomixConstants.META_SERVICE_ID);
+            }
+
+            @Override
+            public String getHost() {
+                return member.metadata().get(AtomixConstants.META_SERVICE_HOST);
+            }
+
+            @Override
+            public int getPort() {
+                return Integer.parseInt(member.metadata().get(AtomixConstants.META_SERVICE_PORT));
+            }
+
+            @Override
+            public boolean isSecure() {
+                return Objects.equals(
+                    "https",
+                    member.metadata().get(AtomixConstants.META_SERVICE_SCHEME)
+                );
+            }
+
+            @Override
+            public URI getUri() {
+                String scheme = member.metadata().getOrDefault(AtomixConstants.META_SERVICE_SCHEME, "http");
+                if (scheme == null && isSecure()) {
+                    scheme = "https";
+                }
+
+                return URI.create(
+                    String.format("%s://%s:%d", scheme, getHost(), getPort())
+                );
+            }
+
+            @Override
+            public Map<String, String> getMetadata() {
+                return ImmutableMap.copyOf(member.metadata());
+            }
+        };
+    }
+
+    private Stream<Member> getMembers() {
+        return client.getMembers().stream()
+            .filter(member -> {
+                return member.metadata().containsKey(AtomixConstants.META_SERVICE_ID);
+            })
+            .filter(member -> {
+                final Map<String, String> metadata = member.metadata();
+                final String serviceId = metadata.get(AtomixConstants.META_SERVICE_ID);
+                final AtomixDiscoveryClientProperties.ServiceConfig serviceConfig = properties.getServices().get(serviceId);
+
+                if (serviceConfig != null) {
+                    return metadata.isEmpty() || metadata.entrySet().containsAll(serviceConfig.getMetadata().entrySet());
+                }
+
+                return true;
+            });
     }
 }
