@@ -86,21 +86,45 @@
       <groupId>com.netflix.ribbon</groupId>
       <artifactId>ribbon</artifactId>
       <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.netflix.ribbon</groupId>
       <artifactId>ribbon-core</artifactId>
       <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.netflix.ribbon</groupId>
       <artifactId>ribbon-loadbalancer</artifactId>
       <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.netflix.ribbon</groupId>
       <artifactId>ribbon-httpclient</artifactId>
       <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.github.openfeign</groupId>

@@ -155,46 +155,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-			<dependency>
-				<groupId>com.netflix.ribbon</groupId>
-				<artifactId>ribbon</artifactId>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.guava</groupId>
-						<artifactId>guava</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.netflix.ribbon</groupId>
-				<artifactId>ribbon-core</artifactId>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.guava</groupId>
-						<artifactId>guava</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.netflix.ribbon</groupId>
-				<artifactId>ribbon-loadbalancer</artifactId>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.guava</groupId>
-						<artifactId>guava</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.netflix.ribbon</groupId>
-				<artifactId>ribbon-httpclient</artifactId>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.guava</groupId>
-						<artifactId>guava</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 			<!-- end archaius deps -->
 		</dependencies>
 	</dependencyManagement>
