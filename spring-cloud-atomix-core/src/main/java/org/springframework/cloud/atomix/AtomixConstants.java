@@ -21,6 +21,8 @@ public final class AtomixConstants {
     public static final String META_SERVICE_HOST = "service.host";
     public static final String META_SERVICE_PORT = "service.port";
     public static final String META_SERVICE_SCHEME = "service.scheme";
+    public static final String META_SERVICE_RACK = "service.rack";
+    public static final String META_SERVICE_ZONE = "service.zone";
 
     private AtomixConstants() {
     }

@@ -16,14 +16,11 @@
 
 package org.springframework.cloud.atomix.discovery;
 
-import java.net.URI;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableMap;
-import io.atomix.cluster.Member;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.atomix.AtomixConstants;
 import org.springframework.cloud.client.ServiceInstance;
@@ -48,8 +45,13 @@ public class AtomixDiscoveryClient implements DiscoveryClient {
 
     @Override
     public List<ServiceInstance> getInstances(String serviceId) {
+        if (serviceId == null) {
+            return Collections.emptyList();
+        }
+
         return AtomixDiscoveryUtils.getServices(this.client, this.properties)
-            .map(member -> asInstance(member))
+            .filter(member -> Objects.equals(serviceId, member.metadata().get(AtomixConstants.META_SERVICE_ID)))
+            .map(AtomixServiceInstance::new)
             .collect(Collectors.toList());
     }
 
@@ -59,53 +61,5 @@ public class AtomixDiscoveryClient implements DiscoveryClient {
             .map(member -> member.metadata().get(AtomixConstants.META_SERVICE_ID))
             .distinct()
             .collect(Collectors.toList());
-    }
-
-    // ****************
-    // Helpers
-    // ****************
-
-    private ServiceInstance asInstance(Member member) {
-        return new ServiceInstance() {
-            @Override
-            public String getServiceId() {
-                return member.metadata().get(AtomixConstants.META_SERVICE_ID);
-            }
-
-            @Override
-            public String getHost() {
-                return member.metadata().get(AtomixConstants.META_SERVICE_HOST);
-            }
-
-            @Override
-            public int getPort() {
-                return Integer.parseInt(member.metadata().get(AtomixConstants.META_SERVICE_PORT));
-            }
-
-            @Override
-            public boolean isSecure() {
-                return Objects.equals(
-                    "https",
-                    member.metadata().get(AtomixConstants.META_SERVICE_SCHEME)
-                );
-            }
-
-            @Override
-            public URI getUri() {
-                String scheme = member.metadata().getOrDefault(AtomixConstants.META_SERVICE_SCHEME, "http");
-                if (scheme == null && isSecure()) {
-                    scheme = "https";
-                }
-
-                return URI.create(
-                    String.format("%s://%s:%d", scheme, getHost(), getPort())
-                );
-            }
-
-            @Override
-            public Map<String, String> getMetadata() {
-                return ImmutableMap.copyOf(member.metadata());
-            }
-        };
     }
 }

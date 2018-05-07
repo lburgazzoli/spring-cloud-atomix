@@ -1,7 +1,4 @@
 # Auto Configuration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    org.springframework.cloud.atomix.discovery.AtomixDiscoveryAutoConfiguration
-
-# Environment Post Processors
-#org.springframework.boot.env.EnvironmentPostProcessor=\
-#    org.springframework.cloud.atomix.discovery.dependency.DependencyEnvironmentPostProcessor
+    org.springframework.cloud.atomix.discovery.AtomixDiscoveryAutoConfiguration,\
+    org.springframework.cloud.atomix.discovery.ribbon.AtomixRibbonConfiguration

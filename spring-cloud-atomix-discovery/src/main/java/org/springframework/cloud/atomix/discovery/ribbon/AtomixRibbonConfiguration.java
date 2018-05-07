@@ -23,11 +23,9 @@ import com.netflix.config.ConfigurationManager;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.config.DynamicStringProperty;
 import com.netflix.loadbalancer.ServerList;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.atomix.discovery.AtomixDiscoveryProperties;
 import org.springframework.cloud.netflix.ribbon.RibbonAutoConfiguration;

@@ -20,9 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import io.atomix.cluster.Member;
-import io.atomix.core.Atomix;
-import io.atomix.core.profile.Profile;
 import io.atomix.core.tree.DocumentPath;
 import org.junit.After;
 import org.junit.Before;
@@ -67,7 +64,7 @@ public class AtomixPropertySourceLocatorTests {
         this.atomix.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", APPL_CONTEXT, "props.p2"), "v2");
         this.atomix.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", TEST_CONTEXT, "props.p2"), "v2.1");
 
-        this.context = new SpringApplicationBuilder(Config.class).web(WebApplicationType.NONE).run(
+        this.context = new SpringApplicationBuilder(TestConfig.class).web(WebApplicationType.NONE).run(
             "--banner.mode=OFF",
             "--spring.cloud.atomix.local-member.address=" + "localhost:" + SocketUtils.findAvailableTcpPort(),
             "--spring.cloud.atomix.members[0].address=" + "localhost:" + atomix.getLocalMember().address().port(),
@@ -98,7 +95,7 @@ public class AtomixPropertySourceLocatorTests {
         assertThat(context.getEnvironment().getProperty("props.p2")).isEqualTo("v2.1");
     }
 
-    @Ignore // FIXME broken tests with boot 2.0.0
+    @Ignore("AtomixClient registered twice")
     @Test
     public void propertyLoadedAndUpdated() throws Exception {
         assertThat(context.getEnvironment().getProperty("props.p1")).isEqualTo("v1");
@@ -119,7 +116,7 @@ public class AtomixPropertySourceLocatorTests {
 
     @Configuration
     @EnableAutoConfiguration
-    static class Config {
+    static class TestConfig {
         @Bean
         public CountDownLatch countDownLatch() {
             return new CountDownLatch(1);

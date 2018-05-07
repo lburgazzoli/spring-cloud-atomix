@@ -18,7 +18,6 @@ package org.springframework.cloud.atomix.discovery;
 
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
@@ -51,7 +50,7 @@ public class AtomixDiscoveryAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "spring.cloud.atomix.discovery.services-watch.enabled", matchIfMissing = true)
+    @ConditionalOnAtomixServicesWatchEnabled
     public AtomixServiceWatch atomixServiceWatch(AtomixClient client) {
         return new AtomixServiceWatch(client);
     }
