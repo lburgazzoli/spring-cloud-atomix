@@ -31,7 +31,7 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 @ConfigurationProperties("spring.cloud.atomix.config")
-public class AtomixConfigProperties {
+public class AtomixConfigConfiguration {
     private boolean enabled = true;
 
     /**

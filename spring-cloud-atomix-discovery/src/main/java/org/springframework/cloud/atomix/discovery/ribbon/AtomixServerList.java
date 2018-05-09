@@ -24,7 +24,7 @@ import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.AbstractServerList;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.atomix.AtomixConstants;
-import org.springframework.cloud.atomix.discovery.AtomixDiscoveryProperties;
+import org.springframework.cloud.atomix.discovery.AtomixDiscoveryConfiguration;
 import org.springframework.cloud.atomix.discovery.AtomixDiscoveryUtils;
 
 /**
@@ -32,10 +32,10 @@ import org.springframework.cloud.atomix.discovery.AtomixDiscoveryUtils;
  */
 public class AtomixServerList extends AbstractServerList<AtomixServer> {
     private final AtomixClient client;
-    private final AtomixDiscoveryProperties properties;
+    private final AtomixDiscoveryConfiguration properties;
     private String serviceId;
 
-    public AtomixServerList(AtomixClient client, AtomixDiscoveryProperties properties) {
+    public AtomixServerList(AtomixClient client, AtomixDiscoveryConfiguration properties) {
         this.client = Objects.requireNonNull(client);
         this.properties = Objects.requireNonNull(properties);
     }

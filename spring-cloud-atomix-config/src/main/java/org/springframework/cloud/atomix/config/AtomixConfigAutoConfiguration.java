@@ -38,7 +38,7 @@ public class AtomixConfigAutoConfiguration {
         @ConditionalOnAtomixConfigWatchEnabled
         public AtomixConfigWatcher configWatcher(
                 AtomixClient client,
-                AtomixConfigProperties configProperties,
+                AtomixConfigConfiguration configProperties,
                 AtomixPropertySourceLocator locator) {
 
             return new AtomixConfigWatcher(client, configProperties, locator.getContexts());

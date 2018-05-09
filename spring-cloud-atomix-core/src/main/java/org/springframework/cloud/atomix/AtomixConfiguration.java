@@ -33,7 +33,7 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 @ConfigurationProperties("spring.cloud.atomix")
-public class AtomixProperties {
+public class AtomixConfiguration {
 
     /**
      * Is Atomix enabled

@@ -64,10 +64,10 @@ public class AtomixPropertySourceLocator implements PropertySourceLocator {
     private static final Logger LOGGER = LoggerFactory.getLogger(AtomixPropertySourceLocator.class);
 
     private final AtomixClient client;
-    private final AtomixConfigProperties properties;
+    private final AtomixConfigConfiguration properties;
     private final List<String> contexts;
 
-    public AtomixPropertySourceLocator(AtomixClient client, AtomixConfigProperties properties) {
+    public AtomixPropertySourceLocator(AtomixClient client, AtomixConfigConfiguration properties) {
         this.client = client;
         this.properties = properties;
         this.contexts = new ArrayList<>();

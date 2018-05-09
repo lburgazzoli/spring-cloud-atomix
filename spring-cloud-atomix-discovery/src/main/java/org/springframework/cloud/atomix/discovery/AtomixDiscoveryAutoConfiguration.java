@@ -31,20 +31,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnAtomixDiscoveryEnabled
 @AutoConfigureBefore({CommonsClientAutoConfiguration.class, SimpleDiscoveryClientAutoConfiguration.class})
-@EnableConfigurationProperties
+@EnableConfigurationProperties(AtomixDiscoveryConfiguration.class)
 public class AtomixDiscoveryAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AtomixDiscoveryProperties atomixDiscoveryProperties() {
-        return new AtomixDiscoveryProperties();
-    }
 
     @Bean
     @ConditionalOnMissingBean
     public AtomixDiscoveryClient atomixDiscoveryClient(
             AtomixClient client,
-            AtomixDiscoveryProperties discoveryProperties) {
+            AtomixDiscoveryConfiguration discoveryProperties) {
         return new AtomixDiscoveryClient(client, discoveryProperties);
     }
 

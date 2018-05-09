@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.atomix.AtomixClient;
-import org.springframework.cloud.atomix.discovery.AtomixDiscoveryProperties;
+import org.springframework.cloud.atomix.discovery.AtomixDiscoveryConfiguration;
 import org.springframework.cloud.netflix.ribbon.RibbonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +57,7 @@ public class AtomixRibbonConfiguration {
 	public ServerList<?> atomixServerList(
             IClientConfig config,
             AtomixClient client,
-            AtomixDiscoveryProperties properties) {
+            AtomixDiscoveryConfiguration properties) {
 
 		AtomixServerList serverList = new AtomixServerList(client, properties);
         serverList.initWithNiwsConfig(config);

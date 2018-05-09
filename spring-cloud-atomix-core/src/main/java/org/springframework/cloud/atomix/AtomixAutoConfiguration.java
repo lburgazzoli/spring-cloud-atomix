@@ -43,18 +43,13 @@ import org.springframework.core.convert.converter.Converter;
  */
 @Configuration
 @ConditionalOnAtomixEnabled
-@EnableConfigurationProperties
+@EnableConfigurationProperties(AtomixConfiguration.class)
 public class AtomixAutoConfiguration {
-    @Bean
-    @ConditionalOnMissingBean(AtomixProperties.class)
-    public AtomixProperties atomixProperties() {
-        return new AtomixProperties();
-    }
 
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean
-    public AtomixClient atomixClient(AtomixProperties properties) {
+    public AtomixClient atomixClient(AtomixConfiguration properties) {
         final AtomixConfig config = new AtomixConfig();
         final MemberConfig local = new MemberConfig();
 

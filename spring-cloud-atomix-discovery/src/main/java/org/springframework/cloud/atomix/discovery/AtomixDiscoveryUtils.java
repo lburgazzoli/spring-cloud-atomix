@@ -27,7 +27,7 @@ public final class AtomixDiscoveryUtils {
     private AtomixDiscoveryUtils() {
     }
 
-    public static Stream<Member> getServices(AtomixClient client, AtomixDiscoveryProperties properties) {
+    public static Stream<Member> getServices(AtomixClient client, AtomixDiscoveryConfiguration properties) {
         return client.getMembers().stream()
             .filter(member -> {
                 return member.metadata().containsKey(AtomixConstants.META_SERVICE_ID);
@@ -35,7 +35,7 @@ public final class AtomixDiscoveryUtils {
             .filter(member -> {
                 final Map<String, String> metadata = member.metadata();
                 final String serviceId = metadata.get(AtomixConstants.META_SERVICE_ID);
-                final AtomixDiscoveryProperties.ServiceConfig serviceConfig = properties.getServices().get(serviceId);
+                final AtomixDiscoveryConfiguration.ServiceConfig serviceConfig = properties.getServices().get(serviceId);
 
                 if (serviceConfig != null) {
                     return metadata.isEmpty() || metadata.entrySet().containsAll(serviceConfig.getMetadata().entrySet());

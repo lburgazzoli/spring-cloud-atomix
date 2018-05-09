@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnAtomixEnabled
 @Import(AtomixAutoConfiguration.class)
+@EnableConfigurationProperties(AtomixConfigConfiguration.class)
 public class AtomixConfigBootstrapConfiguration {
 
     @Configuration
@@ -45,14 +46,8 @@ public class AtomixConfigBootstrapConfiguration {
         @ConditionalOnMissingBean
         public AtomixPropertySourceLocator atomixPropertySourceLocator(
             AtomixClient client,
-            AtomixConfigProperties properties) {
+            AtomixConfigConfiguration properties) {
             return new AtomixPropertySourceLocator(client, properties);
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public AtomixConfigProperties atomixConfigProperties() {
-            return new AtomixConfigProperties();
         }
     }
 }

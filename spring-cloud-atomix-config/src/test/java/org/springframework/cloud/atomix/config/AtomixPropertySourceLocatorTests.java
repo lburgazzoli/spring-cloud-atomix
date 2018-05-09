@@ -20,6 +20,9 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import io.atomix.cluster.Member;
+import io.atomix.core.Atomix;
+import io.atomix.core.profile.Profile;
 import io.atomix.core.tree.DocumentPath;
 import org.junit.After;
 import org.junit.Before;
@@ -30,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -49,7 +53,7 @@ public class AtomixPropertySourceLocatorTests {
     private static final String APPL_CONTEXT = "application";
     private static final String TEST_CONTEXT = "test-application";
 
-    private AtomixService atomix;
+    private AtomixClient atomix;
     private ConfigurableApplicationContext context;
 
     // *****************
@@ -58,7 +62,25 @@ public class AtomixPropertySourceLocatorTests {
 
     @Before
     public void setUp() {
-        this.atomix = new AtomixService();
+        final int port = SocketUtils.findAvailableTcpPort();
+
+        this.atomix = new AtomixClient(Atomix.builder()
+            .withLocalMember(
+                Member.builder("_test-service")
+                    .withAddress("localhost:" + port)
+                    .withType(Member.Type.PERSISTENT)
+                    .build())
+            .withMembers(
+                Member.builder("_test-service")
+                    .withType(Member.Type.PERSISTENT)
+                    .withAddress("localhost:" + port)
+                    .build())
+            .withProfiles(
+                Profile.DATA_GRID
+            )
+            .build()
+        );
+
         this.atomix.start();
         this.atomix.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", APPL_CONTEXT, "props.p1"), "v1");
         this.atomix.getDocumentTree(ROOT).createRecursive(DocumentPath.from("root", APPL_CONTEXT, "props.p2"), "v2");

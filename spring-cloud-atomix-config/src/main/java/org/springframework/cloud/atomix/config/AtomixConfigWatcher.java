@@ -37,14 +37,14 @@ import org.springframework.context.Lifecycle;
  */
 public class AtomixConfigWatcher implements Lifecycle, DocumentTreeListener<String>, ApplicationEventPublisherAware {
     private final AtomixClient client;
-    private final AtomixConfigProperties configProperties;
+    private final AtomixConfigConfiguration configProperties;
     private final List<String> contexts;
     private final AtomicBoolean running;
 
     private DocumentTree<String> tree;
     private ApplicationEventPublisher publisher;
 
-    public AtomixConfigWatcher(AtomixClient client, AtomixConfigProperties configProperties, List<String> contexts) {
+    public AtomixConfigWatcher(AtomixClient client, AtomixConfigConfiguration configProperties, List<String> contexts) {
         this.client = client;
         this.configProperties = configProperties;
         this.contexts = contexts;

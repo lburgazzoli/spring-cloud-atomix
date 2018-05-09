@@ -31,9 +31,9 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  */
 public class AtomixDiscoveryClient implements DiscoveryClient {
     private final AtomixClient client;
-    private final AtomixDiscoveryProperties properties;
+    private final AtomixDiscoveryConfiguration properties;
 
-    public AtomixDiscoveryClient(AtomixClient client, AtomixDiscoveryProperties properties) {
+    public AtomixDiscoveryClient(AtomixClient client, AtomixDiscoveryConfiguration properties) {
         this.client = client;
         this.properties = properties;
     }
