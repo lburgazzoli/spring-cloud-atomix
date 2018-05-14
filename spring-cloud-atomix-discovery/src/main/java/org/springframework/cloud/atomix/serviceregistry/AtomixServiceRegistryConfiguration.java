@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.atomix.discovery;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.springframework.cloud.atomix.serviceregistry;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Defines configuration for service discovery.
+ * Defines configuration for service registration.
  *
  * @author Luca Burgazzoli
  */
 @ConfigurationProperties("spring.cloud.atomix.discovery")
-public class AtomixDiscoveryConfiguration {
+public class AtomixServiceRegistryConfiguration {
     /**
      * Is service discovery enabled
      * */
     private boolean enabled = true;
-
-    /**
-     * Service configuration i.e. filtering
-     */
-    private Map<String, ServiceConfig> services = new HashMap<>();
 
     public boolean isEnabled() {
         return enabled;
@@ -44,18 +36,5 @@ public class AtomixDiscoveryConfiguration {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public Map<String, ServiceConfig> getServices() {
-        return services;
-    }
-
-
-    public static class ServiceConfig {
-        private Map<String, String> metadata = new HashMap<>();
-
-        public Map<String, String> getMetadata() {
-            return metadata;
-        }
     }
 }

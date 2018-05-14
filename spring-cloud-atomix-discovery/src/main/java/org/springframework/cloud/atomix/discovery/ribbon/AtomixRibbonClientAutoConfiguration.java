@@ -22,7 +22,10 @@ import com.netflix.client.config.IClientConfig;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.config.DynamicStringProperty;
+import com.netflix.loadbalancer.IPing;
+import com.netflix.loadbalancer.Server;
 import com.netflix.loadbalancer.ServerList;
+import com.netflix.loadbalancer.ServerListFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,7 +48,7 @@ import static com.netflix.client.config.CommonClientConfigKey.EnableZoneAffinity
 @Configuration
 @ConditionalOnRibbonAtomixEnabled
 @AutoConfigureAfter(RibbonAutoConfiguration.class)
-public class AtomixRibbonConfiguration {
+public class AtomixRibbonClientAutoConfiguration {
     protected static final String VALUE_NOT_SET = "__not__set__";
     protected static final String DEFAULT_NAMESPACE = "ribbon";
 
@@ -64,6 +67,17 @@ public class AtomixRibbonConfiguration {
         
 		return serverList;
     }
+
+    @Bean
+    public ServerListFilter<Server> atomixServerListFilter() {
+        return new AtomixActiveServerListFilter();
+    }
+
+	@Bean
+	@ConditionalOnMissingBean
+	public IPing ribbonPing() {
+		return new AtomixPing();
+	}
 
 	@PostConstruct
 	public void preprocess() {

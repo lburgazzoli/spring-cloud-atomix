@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.atomix.discovery;
+package org.springframework.cloud.atomix.serviceregistry;
 
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.atomix.AtomixClient;
-import org.springframework.cloud.client.CommonsClientAutoConfiguration;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration;
+import org.springframework.cloud.atomix.ConditionalOnAtomixEnabled;
+import org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,24 +28,16 @@ import org.springframework.context.annotation.Configuration;
  * @author Luca Burgazzoli
  */
 @Configuration
-@ConditionalOnDiscoveryEnabled
-@ConditionalOnAtomixDiscoveryEnabled
-@AutoConfigureBefore({CommonsClientAutoConfiguration.class, SimpleDiscoveryClientAutoConfiguration.class})
-@EnableConfigurationProperties(AtomixDiscoveryConfiguration.class)
-public class AtomixDiscoveryAutoConfiguration {
-
+@ConditionalOnAtomixEnabled
+@ConditionalOnAtomixServiceRegistryEnabled
+@AutoConfigureBefore(ServiceRegistryAutoConfiguration.class)
+public class AtomixServiceRegistryAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    public AtomixDiscoveryClient atomixDiscoveryClient(
+    public AtomixServiceRegistry consulServiceRegistry(
             AtomixClient client,
-            AtomixDiscoveryConfiguration discoveryProperties) {
-        return new AtomixDiscoveryClient(client, discoveryProperties);
+            AtomixServiceRegistryConfiguration configuration) {
+        return new AtomixServiceRegistry(client, configuration);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnAtomixServicesWatchEnabled
-    public AtomixServiceWatch atomixServiceWatch(AtomixClient client) {
-        return new AtomixServiceWatch(client);
-    }
 }

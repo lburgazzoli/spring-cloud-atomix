@@ -16,74 +16,51 @@
 
 package org.springframework.cloud.atomix.discovery;
 
-import java.util.HashMap;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
+import com.google.common.collect.ImmutableMap;
+import org.junit.Rule;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.atomix.AtomixConstants;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AtomixDiscoveryClientTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixDiscoveryClientTest.class);
     private static final String TEST_CONTEXT = "test-application";
 
-    private AtomixService bootstrap;
-
-    // *****************
-    // Test setup
-    // *****************
-
-    @Before
-    public void setUp() {
-        // Set up the boostrap node
-        this.bootstrap = new AtomixService();
-        this.bootstrap.start();
-
-        this.bootstrap.client("s1i1", new HashMap<String, String>() {{
-            put(AtomixConstants.META_SERVICE_ID, "my-service-1");
-            put(AtomixConstants.META_SERVICE_ZONE, "US");
-            put(AtomixConstants.META_SERVICE_RACK, "r1");
-        }});
-        this.bootstrap.client("s1i2", new HashMap<String, String>() {{
-            put(AtomixConstants.META_SERVICE_ID, "my-service-1");
-            put(AtomixConstants.META_SERVICE_ZONE, "US");
-            put(AtomixConstants.META_SERVICE_RACK, "r2");
-        }});
-        this.bootstrap.client("s1i3", new HashMap<String, String>() {{
-            put(AtomixConstants.META_SERVICE_ID, "my-service-1");
-            put(AtomixConstants.META_SERVICE_ZONE, "EU");
-            put(AtomixConstants.META_SERVICE_RACK, "r1");
-        }});
-        this.bootstrap.client("s1i4", new HashMap<String, String>() {{
-            put(AtomixConstants.META_SERVICE_ID, "my-service-1");
-            put(AtomixConstants.META_SERVICE_ZONE, "EU");
-            put(AtomixConstants.META_SERVICE_RACK, "r2");
-        }});
-        this.bootstrap.client("s2i1", new HashMap<String, String>() {{
-            put(AtomixConstants.META_SERVICE_ID, "my-service-2");
-            put(AtomixConstants.META_SERVICE_ZONE, "EU");
-            put(AtomixConstants.META_SERVICE_RACK, "r1");
-        }});
-    }
-
-    @After
-    public void tearDown() {
-        if (this.bootstrap != null) {
-            this.bootstrap.stop();
-        }
-    }
+    @Rule
+    public final AtomixService service = new AtomixService(c -> {
+        c.client("s1i1", ImmutableMap.of(
+            AtomixConstants.META_SERVICE_ID, "my-service-1",
+            AtomixConstants.META_SERVICE_ZONE, "US",
+            AtomixConstants.META_SERVICE_RACK, "r1"
+        ));
+        c.client("s1i2", ImmutableMap.of(
+            AtomixConstants.META_SERVICE_ID, "my-service-1",
+            AtomixConstants.META_SERVICE_ZONE, "US",
+            AtomixConstants.META_SERVICE_RACK, "r2"
+        ));
+        c.client("s1i3", ImmutableMap.of(
+            AtomixConstants.META_SERVICE_ID, "my-service-1",
+            AtomixConstants.META_SERVICE_ZONE, "EU",
+            AtomixConstants.META_SERVICE_RACK, "r1"
+        ));
+        c.client("s1i4", ImmutableMap.of(
+            AtomixConstants.META_SERVICE_ID, "my-service-1",
+            AtomixConstants.META_SERVICE_ZONE, "EU",
+            AtomixConstants.META_SERVICE_RACK, "r2"
+        ));
+        c.client("s2i1", ImmutableMap.of(
+            AtomixConstants.META_SERVICE_ID, "my-service-2",
+            AtomixConstants.META_SERVICE_ZONE, "EU",
+            AtomixConstants.META_SERVICE_RACK, "r1"
+        ));
+    });
 
     // *****************
     // Tests
@@ -91,64 +68,60 @@ public class AtomixDiscoveryClientTest {
 
     @Test
     public void checkSimpleDiscovery() {
-        ConfigurableApplicationContext context = null;
+        new ApplicationContextRunner()
+            .withUserConfiguration(
+                TestConfig.class
+            )
+            .withPropertyValues(
+                "banner.mode=OFF",
+                "spring.cloud.atomix.local-member.address=" + "localhost:" + SocketUtils.findAvailableTcpPort(),
+                "spring.cloud.atomix.members[0].address=" + "localhost:" + service.atomix().getLocalMember().address().port(),
+                "spring.cloud.atomix.members[0].id=" + service.atomix().getLocalMember().id().id(),
+                "spring.cloud.atomix.members[0].type=" + service.atomix().getLocalMember().type().name(),
+                "spring.cloud.atomix.config.enabled=false",
+                "spring.cloud.atomix.discovery.enabled=true",
+                "ribbon.atomix.enabled=false",
+                "spring.application.name=" + TEST_CONTEXT
+            )
+            .run(
+                context -> {
+                    AtomixDiscoveryClient client = context.getBean(AtomixDiscoveryClient.class);
+                    List<ServiceInstance> s1instances = client.getInstances("my-service-1");
+                    List<ServiceInstance> s2instances = client.getInstances("my-service-2");
 
-        try {
-            context = new SpringApplicationBuilder(TestConfig.class).web(WebApplicationType.NONE).run(
-                "--banner.mode=OFF",
-                "--spring.cloud.atomix.local-member.address=" + "localhost:" + SocketUtils.findAvailableTcpPort(),
-                "--spring.cloud.atomix.members[0].address=" + "localhost:" + bootstrap.getLocalMember().address().port(),
-                "--spring.cloud.atomix.members[0].id=" + bootstrap.getLocalMember().id().id(),
-                "--spring.cloud.atomix.members[0].type=" + bootstrap.getLocalMember().type().name(),
-                "--spring.cloud.atomix.config.enabled=false",
-                "--spring.cloud.atomix.discovery.enabled=true",
-                "--ribbon.atomix.enabled=false",
-                "--spring.application.name=" + TEST_CONTEXT
+                    assertThat(s1instances).hasSize(4);
+                    assertThat(s2instances).hasSize(1);
+                }
             );
-
-            AtomixDiscoveryClient client = context.getBean(AtomixDiscoveryClient.class);
-            List<ServiceInstance> s1instances = client.getInstances("my-service-1");
-            List<ServiceInstance> s2instances = client.getInstances("my-service-2");
-
-            assertThat(s1instances).hasSize(4);
-            assertThat(s2instances).hasSize(1);
-        } finally {
-            if (context != null) {
-                context.close();
-            }
-        }
     }
 
     @Test
     public void checkDiscoveryWithFilters() {
-        ConfigurableApplicationContext context = null;
+        new ApplicationContextRunner()
+            .withUserConfiguration(TestConfig.class)
+            .withPropertyValues(
+                "banner.mode=OFF",
+                "spring.cloud.atomix.local-member.address=" + "localhost:" + SocketUtils.findAvailableTcpPort(),
+                "spring.cloud.atomix.members[0].address=" + "localhost:" + service.atomix().getLocalMember().address().port(),
+                "spring.cloud.atomix.members[0].id=" + service.atomix().getLocalMember().id().id(),
+                "spring.cloud.atomix.members[0].type=" + service.atomix().getLocalMember().type().name(),
+                "spring.cloud.atomix.config.enabled=false",
+                "spring.cloud.atomix.discovery.enabled=true",
+                "spring.cloud.atomix.discovery.services[my-service-1].metadata[service.zone]=EU",
+                "spring.cloud.atomix.discovery.services[my-service-2].metadata[service.zone]=US",
+                "ribbon.atomix.enabled=false",
+                "spring.application.name=" + TEST_CONTEXT
+            )
+            .run(
+                context -> {
+                    AtomixDiscoveryClient client = context.getBean(AtomixDiscoveryClient.class);
+                    List<ServiceInstance> s1instances = client.getInstances("my-service-1");
+                    List<ServiceInstance> s2instances = client.getInstances("my-service-2");
 
-        try {
-            context = new SpringApplicationBuilder(TestConfig.class).web(WebApplicationType.NONE).run(
-                "--banner.mode=OFF",
-                "--spring.cloud.atomix.local-member.address=" + "localhost:" + SocketUtils.findAvailableTcpPort(),
-                "--spring.cloud.atomix.members[0].address=" + "localhost:" + bootstrap.getLocalMember().address().port(),
-                "--spring.cloud.atomix.members[0].id=" + bootstrap.getLocalMember().id().id(),
-                "--spring.cloud.atomix.members[0].type=" + bootstrap.getLocalMember().type().name(),
-                "--spring.cloud.atomix.config.enabled=false",
-                "--spring.cloud.atomix.discovery.enabled=true",
-                "--spring.cloud.atomix.discovery.services[my-service-1].metadata[service.zone]=EU",
-                "--spring.cloud.atomix.discovery.services[my-service-2].metadata[service.zone]=US",
-                "--ribbon.atomix.enabled=false",
-                "--spring.application.name=" + TEST_CONTEXT
+                    assertThat(s1instances).hasSize(2);
+                    assertThat(s2instances).hasSize(0);
+                }
             );
-
-            AtomixDiscoveryClient client = context.getBean(AtomixDiscoveryClient.class);
-            List<ServiceInstance> s1instances = client.getInstances("my-service-1");
-            List<ServiceInstance> s2instances = client.getInstances("my-service-2");
-
-            assertThat(s1instances).hasSize(2);
-            assertThat(s2instances).hasSize(0);
-        } finally {
-            if (context != null) {
-                context.close();
-            }
-        }
     }
 
     // *****************

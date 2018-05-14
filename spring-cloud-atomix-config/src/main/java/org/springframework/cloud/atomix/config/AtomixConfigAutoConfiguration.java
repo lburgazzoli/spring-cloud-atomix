@@ -17,6 +17,7 @@
 package org.springframework.cloud.atomix.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.endpoint.RefreshEndpoint;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnAtomixConfigEnabled
+@EnableConfigurationProperties(AtomixConfigConfiguration.class)
 public class AtomixConfigAutoConfiguration {
 
     @Configuration

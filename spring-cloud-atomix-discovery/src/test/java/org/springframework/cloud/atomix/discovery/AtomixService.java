@@ -19,32 +19,48 @@ package org.springframework.cloud.atomix.discovery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
 import io.atomix.core.profile.Profile;
+import org.junit.rules.ExternalResource;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.util.SocketUtils;
 
-public class AtomixService extends AtomixClient {
-    private List<Atomix> clients;
+public class AtomixService extends ExternalResource {
+    private final AtomixClient atomix;
+    private final List<Atomix> clients;
+    private final Consumer<AtomixService> afterSetup;
 
     public AtomixService() {
-        super(
-            createAtomixInstance()
-        );
-
-        this.clients = new ArrayList<>();
+        this(s -> {});
     }
 
+    public AtomixService(Consumer<AtomixService> afterSetup) {
+        this.atomix = new AtomixClient(createAtomixInstance());
+        this.clients = new ArrayList<>();
+        this.afterSetup = afterSetup;
+    }
 
     @Override
-    public void stop() {
+    protected void before() throws Throwable {
+        atomix.start();
+
+        afterSetup.accept(this);
+    }
+
+    @Override
+    protected void after() {
         clients.stream().forEach(
             client -> client.stop().join()
         );
 
-        super.stop();
+        atomix.stop();
+    }
+
+    public AtomixClient atomix() {
+        return atomix;
     }
 
     public Atomix client(String id, Map<String, String> metadata) {
@@ -56,7 +72,7 @@ public class AtomixService extends AtomixClient {
                     .withMetadata(metadata)
                     .build()
             ).withMembers(
-                getLocalMember()
+                atomix.getLocalMember()
             ).withProfiles(
                 Profile.CLIENT
             ).build();

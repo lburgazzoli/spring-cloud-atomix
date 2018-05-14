@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.atomix.discovery;
+package org.springframework.cloud.atomix.serviceregistry;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,8 +30,7 @@ import org.springframework.cloud.atomix.ConditionalOnAtomixEnabled;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-@ConditionalOnDiscoveryEnabled
 @ConditionalOnAtomixEnabled
-@ConditionalOnProperty(value = "spring.cloud.atomix.discovery.enabled", matchIfMissing = true)
-public @interface ConditionalOnAtomixDiscoveryEnabled {
+@ConditionalOnProperty(value = "spring.cloud.service-registry.enabled", matchIfMissing = true)
+public @interface ConditionalOnServiceRegistryEnabled {
 }

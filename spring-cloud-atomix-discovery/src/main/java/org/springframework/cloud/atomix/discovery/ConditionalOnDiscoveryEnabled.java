@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.atomix.ConditionalOnAtomixEnabled;
 
 /**
  * Wrapper annotation to enable Atomix Discovery
@@ -30,8 +29,6 @@ import org.springframework.cloud.atomix.ConditionalOnAtomixEnabled;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-@ConditionalOnDiscoveryEnabled
-@ConditionalOnAtomixEnabled
-@ConditionalOnProperty(value = "spring.cloud.atomix.discovery.enabled", matchIfMissing = true)
-public @interface ConditionalOnAtomixDiscoveryEnabled {
+@ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
+public @interface ConditionalOnDiscoveryEnabled {
 }

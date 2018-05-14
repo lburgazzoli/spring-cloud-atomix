@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.AbstractServerList;
+import io.atomix.cluster.Member;
 import org.springframework.cloud.atomix.AtomixClient;
 import org.springframework.cloud.atomix.AtomixConstants;
 import org.springframework.cloud.atomix.discovery.AtomixDiscoveryConfiguration;
@@ -72,7 +73,12 @@ public class AtomixServerList extends AbstractServerList<AtomixServer> {
                     serviceId, 
                     member.id().id(), 
                     member.address().host(), 
-                    member.address().port());
+                    member.address().port()) {
+                    @Override
+                    public boolean isAlive() {
+                        return member.getState() == Member.State.ACTIVE;
+                    }
+                };
             })
             .collect(Collectors.toList());
     }

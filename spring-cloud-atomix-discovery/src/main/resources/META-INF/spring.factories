@@ -1,4 +1,4 @@
 # Auto Configuration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     org.springframework.cloud.atomix.discovery.AtomixDiscoveryAutoConfiguration,\
-    org.springframework.cloud.atomix.discovery.ribbon.AtomixRibbonConfiguration
+    org.springframework.cloud.atomix.discovery.ribbon.AtomixRibbonClientAutoConfiguration
